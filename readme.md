@@ -80,22 +80,22 @@ Self-awareness:
 
 ##### 1
 
-`seedNoun`    = "brick"
-`typeVariant` = "firebrick"
-`d1`          = "a good fellow"
-`randPrep`    = "in"
-`compliment`  = "the Mail"
+* `seedNoun`    = "brick"
+* `typeVariant` = "firebrick"
+* `d1`          = "a good fellow"
+* `randPrep`    = "in"
+* `compliment`  = "the Mail"
 
 result: "A Good Fellow: the Firebrick in the Mail"
 
 ##### 2
 
-`randHashtag` = "#oppression"
-`seedNoun`    = "membership"
-`typeVariant` = "relationship"
-`d1`          = "the body of members of an organization"
-`randPrep`    = "through"
-`compliment`  = "our health care"
+* `randHashtag` = "#oppression"
+* `seedNoun`    = "membership"
+* `typeVariant` = "relationship"
+* `d1`          = "the body of members of an organization"
+* `randPrep`    = "through"
+* `compliment`  = "our health care"
 
 result: "The Body of Members of an Organization: Relationships Through
 Our Health Care"
