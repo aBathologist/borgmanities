@@ -61,15 +61,15 @@ input resources:
 
 Algorithm:
 
-1. Select `randHashtag` from `hashtags`
-1. Select `seedNoun` from twitter search of `randHashtag`
-1. Get wordsApi `definitions` of `seedNoun`
-1. Select `d1` from `definitions`
-1. Select random `typeVariant` from `definitions`
-1. Pluralize or prepend "the" to `typeVariant`
-1. `title = (titleCase . unwords) [d1 ++ ":", typeVariant, randPrep, complement]`
-1. `msg = "About to publish an article: " ++ "\"" ++ title ++ "\"."`
-1. `if charCount title < 141 then tweet msg else do (1)`
+1. *Pure* : Select `randHashtag` from `hashtags`
+1. *IO*   : Select `seedNoun` from twitter search of `randHashtag`
+1. *IO*   : Get wordsApi `definitions` of `seedNoun`
+1. *Pure* : Select `d1` from `definitions`
+1. *Pure* : Select random `typeVariant` from `definitions`
+1. *Pure* : Pluralize or prepend "the" to `typeVariant`
+1. *Pure* : `title = (titleCase . unwords) [d1 ++ ":", typeVariant, randPrep, complement]`
+1. *Pure* : `msg = "About to publish an article: " ++ "\"" ++ title ++ "\"."`
+1. *IO*   : `if charCount title < 141 then tweet msg else do (1)`
 
 Self-awareness:
 
