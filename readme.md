@@ -14,8 +14,6 @@ exercise.
 
 ### Humanities paper titles ###
 
-e.g.: "Xtreme Formulations: The Gendered Semantic Hierarchy of Male Programmers"
-
 #### Alogrithm sketch (jw):
 
 1. pick the first noun (`seedNoun`) that occurs in the most recent tweet in a set of `hashtags` we prepopulate
