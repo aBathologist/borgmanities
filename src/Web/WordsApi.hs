@@ -18,6 +18,8 @@ import Control.Monad
 import Data.String.Conversions
 import qualified Data.HashMap.Strict as Hash
 
+import Secrets
+
 {--
 
 WordsApi Exports a single function, `wpiEntryFor`.
@@ -49,7 +51,7 @@ wapiQuery query token = wapiEndpoint ++ query ++ "?accessToken=" ++ token
 
 curlGetWapiQuery :: String -> IO String
 curlGetWapiQuery query = do
-    token <- readFile "src/resources/wapiToken.txt"
+    let token = secret Secrets.wapiToken
     (curlCode, jsonStr) <- (curlGetString (wapiQuery query token) [])
     case curlCode of
         CurlOK -> return jsonStr

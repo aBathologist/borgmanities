@@ -1,8 +1,7 @@
 # Ignore Emacs backup files
 *.#*
 
-src/resources/wapiToken.txt
-
+src/Secrets.hs
 
 # Cabal sandbox
 .cabal-sandbox/
