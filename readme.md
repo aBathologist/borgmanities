@@ -5,7 +5,7 @@
     Your insights will adapt to support our theses.
     Resistance is facile.
 
-[Citation](http://en.wikipedia.org/wiki/Borg_(Star_Trek)#.22Resistance_is_futile.22), however, will be meticulous.
+[Citation](https://www.youtube.com/watch?v=AyenRCJ_4Ww), however, will be meticulous.
 
 This project is for fun and learning. We are currently working on a twitter bot in Haskell, but may expand in any number of directions in the future. If we had an agenda, it would include opposing borgification.
 
