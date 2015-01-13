@@ -5,7 +5,7 @@
     Your insights will adapt to support our theses.
     Resistance is facile.
 
-[Citation](https://www.youtube.com/watch?v=AyenRCJ_4Ww), however, will be meticulous.
+But [citation](https://www.youtube.com/watch?v=AyenRCJ_4Ww) can be expected.
 
 This project is for fun and learning. We are currently working on a twitter bot in Haskell, but may expand in any number of directions in the future. If we had an agenda, it would include opposing borgification.
 
