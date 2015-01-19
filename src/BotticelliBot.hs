@@ -1,5 +1,5 @@
-import PaperTitleGen.IO
 import PaperTitleGen.Gen
+import PaperTitleGen.IO
 
 main :: IO ()
 main = putStrLn =<< makePaperTitle 
