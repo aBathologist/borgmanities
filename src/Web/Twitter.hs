@@ -16,3 +16,4 @@ credentials :: Credential
 credentials = Credential
     [ ("oauth_token",        cs (public Secrets.twitterKey))
     , ("oauth_token_secret", cs (secret Secrets.twitterKey)) ]
+
