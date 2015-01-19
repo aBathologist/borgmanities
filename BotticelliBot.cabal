@@ -67,7 +67,11 @@ executable BotticelliBot
                        twitter-types,
                        twitter-types-lens,
                        authenticate-oauth,
-                       conduit
+                       conduit,
+                       http-conduit,
+                       text,
+                       transformers,
+                       lens
   
   -- Directories containing source files.
   hs-source-dirs:      src
