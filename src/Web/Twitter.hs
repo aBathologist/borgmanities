@@ -1,33 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Web.Twitter.Conduit
-import Web.Twitter.Types.Lens
-import Web.Authenticate.OAuth
-import Network.HTTP.Conduit
-import Data.Conduit
-import qualified Data.Conduit.List as CL
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import Control.Monad.IO.Class
-import Control.Lens
+module Web.Twitter (search) where
 
+import System.Process
+   
+-- This is just a wraper around a command line call to the python program python/twitter.hs
+-- It is made into it's own module as a promise that I'll replace the python with a proper haskell
+-- implementation.
 
-import Data.String.Conversions
-import Secrets
+search :: String -> IO [String]
+search str = fmap words (readProcess "python/twitter.py" ["-s", str] [])
 
-tokens :: OAuth
-tokens = twitterOAuth
-    { oauthConsumerKey    = cs $ public Secrets.twitterToken
-    , oauthConsumerSecret = cs $ secret Secrets.twitterToken
-    }
-
-credentials :: Credential
-credentials = Credential
-    [ ("oauth_token",        cs $ public Secrets.twitterKey)
-    , ("oauth_token_secret", cs $ secret Secrets.twitterKey) ]
-
-twInfo :: TWInfo
-twInfo = def
-    { twToken = def { twOAuth = tokens, twCredential = credentials }
-    , twProxy = Nothing
-    }

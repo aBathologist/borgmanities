@@ -9,7 +9,9 @@ module Web.WordsApi
        , typeOf 
        , hasTypes
        , ) where
-                  
+
+import Network.Wreq
+import Control.Lens
 
 import Network.Curl
 import Data.Aeson
@@ -57,8 +59,6 @@ curlGetWapiQuery query = do
         CurlOK -> return jsonStr
         -- Returns the error code if the GET request goes wrong.
         errStr -> return (show errStr) 
-
-
 
 -- | Parsing the JSON Data
 

@@ -64,14 +64,10 @@ executable BotticelliBot
                        aeson,
                        string-conversions, 
                        QuickCheck >= 2.7.6,
-                       twitter-types,
-                       twitter-types-lens,
-                       authenticate-oauth,
-                       conduit,
-                       http-conduit,
                        text,
-                       transformers,
-                       lens
+                       wreq,
+                       lens,
+                       process
   
   -- Directories containing source files.
   hs-source-dirs:      src

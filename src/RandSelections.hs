@@ -7,8 +7,9 @@ module RandSelections
 import Test.QuickCheck (generate, elements)
 
 prepositionsFile, hashtagsFile :: String
-prepositionsFile = "resources/prepositions.txt"
-hashtagsFile     = "resources/hashtags.txt"
+
+prepositionsFile = "src/resources/prepositions.txt"
+hashtagsFile     = "src/resources/hashtags.txt"
  
 randPreposition, randHashtag :: IO String
 randPreposition = randItem =<< fmap lines (readFile prepositionsFile)

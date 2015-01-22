@@ -14,7 +14,7 @@ data TitleParts = TitleParts
                   , typeVariant :: String
                   , randPrep    :: String
                   , definition  :: String
-                  , tweets      :: [Tweet]
+                  , complement  :: String
                   } deriving Show
 
 -- returns the string to be tweeted.
