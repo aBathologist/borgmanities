@@ -41,7 +41,7 @@ def search_twitter(twitterApi, q):
 def normalize_string(term, s):
     transtable = {ord(c): ' ' for c in string.punctuation}
     transtable[ord('\n')] = ' '
-    return s.translate(transtable).replace(term, ' ')
+    return s.translate(transtable).replace(term, ' ').lower()
 
 if __name__ == '__main__':
     args = build_parser().parse_args()
