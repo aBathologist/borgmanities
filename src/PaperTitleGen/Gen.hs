@@ -20,3 +20,4 @@ data TitleParts = TitleParts
 -- returns the string to be tweeted.
 generateTitle :: TitleParts -> String
 generateTitle titleParts = show titleParts
+

@@ -57,17 +57,16 @@ getSeedNoun = do
          Just noun -> return noun
 
 
--- TODO: Refactor
 -- getComplement :: String -> String -> IO String
 getComplement typeVariant randPrep = do
     let searchTerm = typeVariant ++ " " ++ randPrep
-    result     <- (fmap unwords . search . quoteStr) searchTerm
+    result <- (fmap unwords . search . quoteStr) searchTerm
     case listAfterInfix searchTerm result of
         Nothing  -> return Nothing
         Just txt -> do
             complementWords <- (takeUptoIO queryIsNoun . words) txt
             (return . Just . unwords) complementWords
---            (return . maybe) Nothing (Just . unwords) complimentWords
+
 
 
 -- TODO: reduce the amount of justs !
@@ -87,18 +86,17 @@ randTypeVariant (_:defs) = randItem . concat . catMaybes $ defTypes
 -- members of which have are withTypes, or else nothing, if the tail
 -- is empty or if the qeury returns no nouns.
 viableDefinitions :: String -> IO (Maybe [Definition])
-viableDefinitions seedNoun = do
-    results <- wapiEntryFor seedNoun
-    putStrLn ("-- Obtained: \n" ++ show results)
-    case results of
-        Nothing   -> return Nothing
-        Just defs -> do
-            let d1:rest = filter isNoun defs
-                nouns   = filter withTypes rest
-            return $ if (length nouns) > 0
-                        then Just (d1:nouns)
-                        else Nothing 
-
+viableDefinitions seedNoun =
+    do
+        results <- wapiEntryFor seedNoun
+        putStrLn ("-- Obtained: \n" ++ show results)
+        return (maybe Nothing nounsWithTypes results)
+    where
+        nounsWithTypes defs = let d1:nouns = filter isNoun defs
+                              in case filter withTypes nouns of
+                                     []        -> Nothing
+                                     otherwise -> Just (d1:nouns)
+        
 
 
 isNoun :: Definition -> Bool
