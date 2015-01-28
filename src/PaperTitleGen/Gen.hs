@@ -3,10 +3,6 @@ module PaperTitleGen.Gen
        , TitleParts(..) 
        ) where
 
-
---temp
-type Tweet = String
-
 -- TODO: Turn into a pure environment for building up a title.
 
 data TitleParts = TitleParts
@@ -17,7 +13,21 @@ data TitleParts = TitleParts
                   , complement  :: String
                   } deriving Show
 
+
 -- returns the string to be tweeted.
 generateTitle :: TitleParts -> String
 generateTitle titleParts = show titleParts
 
+
+sampleTitle = TitleParts
+              { seedNoun =
+                  "innovation"
+              , typeVariant =
+                  "creativity"
+              , randPrep =
+                  "amid"
+              , definition =
+                  "a creation (a new device or process) resulting from study and experimentation"
+              , complement =
+                  "chaos"
+              }

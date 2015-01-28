@@ -48,7 +48,7 @@ getTitleParts = do
 -- TODO: add safitey mechanism so it won't get trapped in endless cycle.
 getSeedNoun :: IO String
 getSeedNoun = do
-    results <- search =<< randHashtag
+    results   <- search =<< randHashtag
     maybeNoun <- findIO queryIsNoun results
     case maybeNoun of
          Nothing   -> do putStrLn "-- Failed to find seed noun. Retrying."

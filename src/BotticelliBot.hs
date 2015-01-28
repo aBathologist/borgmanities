@@ -1,3 +1,7 @@
+module BotticelliBot
+       ( makePaperTitle )
+       where
+
 import PaperTitleGen.Gen
 import PaperTitleGen.IO
 
