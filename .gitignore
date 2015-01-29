@@ -1,7 +1,9 @@
 # Ignore Emacs backup files
 *.#*
 
+# Secretes files
 src/Secrets.hs
+python/secrets.py
 
 # Cabal sandbox
 .cabal-sandbox/
