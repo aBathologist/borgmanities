@@ -20,10 +20,6 @@ generateTitle titleParts = show titleParts
 
 
 
-
-
-
-
 -- TEMP: for dev use
 --  These definitions are for testing generateTitle without having
 --  to run the full operations to generate title parts.
