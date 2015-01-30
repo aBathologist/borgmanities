@@ -3,14 +3,8 @@
 module Web.WordsApi
        ( wapiEntryFor
        , Definition(..)
-       -- , def
-       -- , pos
-       -- , syn     
-       -- , typeOf 
-       -- , hasTypes
-       , ) where
+       ) where
 
--- import Network.Wreq
 import Control.Lens
 
 import Network.Curl
@@ -30,7 +24,7 @@ TODO: explain....
 --}
 
 
--- | Return the JSON Data given a string to query
+-- Return the JSON Data given a string to query
 
 wapiEntryFor :: String -> IO (Maybe [Definition])
 wapiEntryFor query = do
@@ -43,7 +37,7 @@ wapiEntryFor query = do
 
 
 
--- | Requesting data from WordsApi (aka "Wapi")
+-- Requesting data from WordsApi (aka "Wapi")
 
 wapiEndpoint :: String
 wapiEndpoint = "https://www.wordsapi.com/words/"
@@ -57,10 +51,10 @@ curlGetWapiQuery query = do
     (curlCode, jsonStr) <- (curlGetString (wapiQuery query token) [])
     case curlCode of
         CurlOK -> return jsonStr
-        -- Returns the error code if the GET request goes wrong.
-        errStr -> return (show errStr) 
+        errStr -> return (show errStr)      -- Returns the error code if the GET request goes wrong.
 
--- | Parsing the JSON Data
+
+-- Parsing the JSON Data
 
 wapiResultOfStr :: String -> Maybe WapiResult
 wapiResultOfStr = (decode . cs)
