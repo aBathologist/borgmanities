@@ -148,13 +148,13 @@ takeUptoIO f l = case l of
                     as <- takeUptoIO f xs
                     return (a:as)
     
--- Querries api with a string, and return True if the string
+-- Querries api with a string, and returns True if the string
 -- has noun definition.
 queryIsNoun :: String -> IO Bool
 queryIsNoun s
     | length s < 3 || inBlackList s =  -- no blacklisted words, an no words shorter than 3 letters.
           return False  
-    | otherwise = do             -- We want anything else, so long as it can be a noun.
+    | otherwise = do                   -- We want anything else, so long as it can be a noun.
           result <- wapiEntryFor s
           return $ maybe False (any isNoun) result
 
