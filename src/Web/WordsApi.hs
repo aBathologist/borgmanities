@@ -2,15 +2,15 @@
 
 module Web.WordsApi
        ( wapiEntryFor
-       , Definition
-       , def
-       , pos
-       , syn     
-       , typeOf 
-       , hasTypes
+       , Definition(..)
+       -- , def
+       -- , pos
+       -- , syn     
+       -- , typeOf 
+       -- , hasTypes
        , ) where
 
-import Network.Wreq
+-- import Network.Wreq
 import Control.Lens
 
 import Network.Curl

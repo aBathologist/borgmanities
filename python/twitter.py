@@ -35,11 +35,11 @@ def twitterApi() :
 
 # apiObejct -> queryString -> twitterObjects
 def search_twitter(twitterApi, q):
-    return twitterApi.search(q, "en", "en", 10)
+    return twitterApi.search(q, "en", "en", 20)
 
 # string -> normalizedString
 def normalize_string(term, s):
-    transtable = {ord(c): ' ' for c in string.punctuation.replace("'",'').replace(',','')}
+    transtable = {ord(c): ' ' for c in string.punctuation.replace("'",'')}
     transtable[ord('\n')] = ' '
     return s.translate(transtable).replace(term, ' ').lower()
 

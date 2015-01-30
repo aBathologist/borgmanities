@@ -7,9 +7,9 @@ module PaperTitleGen.Gen
 -- TODO: Turn into a pure environment for building up a title.
 data TitleParts = TitleParts
                   { seedNoun    :: String
+                  , definition  :: String
                   , typeVariant :: String
                   , randPrep    :: String
-                  , definition  :: String
                   , complement  :: String
                   } deriving Show
 

@@ -59,13 +59,11 @@ executable BotticelliBot
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.7 && <4.8,
                        unordered-containers >=0.2 && <0.3,
-                       twitter-conduit, 
                        curl, 
                        aeson,
                        string-conversions, 
                        QuickCheck >= 2.7.6,
                        text,
-                       wreq,
                        lens,
                        process
   
