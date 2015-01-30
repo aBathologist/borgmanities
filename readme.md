@@ -1,8 +1,8 @@
 # Borgmanities
 
-    We are two humans. Publish your works and share of your soul.
-    Your cultural and intellectual accomplishments will be added to our own.
-    Your insights will adapt to support our theses.
+    We are humans. Publish your research and share of your soul.
+    We will add your cultural and intellectual accomplishments to our own.
+    Your insights will adapt to confirm our theses.
     Resistance is facile.
 
 But [citation](https://www.youtube.com/watch?v=AyenRCJ_4Ww) can be expected.
