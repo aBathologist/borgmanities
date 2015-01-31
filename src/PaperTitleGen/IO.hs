@@ -6,7 +6,7 @@ module PaperTitleGen.IO
 
 import PaperTitleGen.Gen
 import Web.WordsApi
-import Web.Twitter
+import qualified Web.Twitter as Twitter
 
 import Data.Maybe
 import Data.List
@@ -20,7 +20,8 @@ import Test.QuickCheck (generate, elements)
     
 -- TODO: add safety mechanism so it won't get trapped in endless cycle
 --       e.g., return erros and quit if fails n times.
-getTitleParts :: IO (TitleParts)
+    
+getTitleParts :: IO TitleParts
 getTitleParts = do
     eitherSeedNoun <- getSeedNoun
     case eitherSeedNoun of
@@ -34,7 +35,7 @@ getTitleParts = do
                     do
                     typeVariant      <- randTypeVariant defs
                     randPrep         <- randPreposition
-                    eitherComplement <- getComplement typeVariant randPrep
+                    eitherComplement <- getComplement randPrep typeVariant
                     case eitherComplement of
                         Left err         -> genFailedRedo err
                         Right complement -> 
@@ -44,30 +45,34 @@ getTitleParts = do
                                               , definition  = def (head defs)
                                               , complement  = complement
                                               }
-                
 
-getSeedNoun :: IO (Either (FailedGen String) String)
+-- assembleTitleParts :: [Either FailedGen ]
+-- assembleTitleParts =
+--     [getSeedNoun, viableDefinitions, randTypeVariant, ]
+
+
+getSeedNoun :: IO (Either FailedGen String)
 getSeedNoun =
     do
-        results   <- search =<< randHashtag
+        results   <- Twitter.search =<< randHashtag
         maybeNoun <- findIO queryIsNoun results
         return $ maybe failed succeeded maybeNoun
     where
-        failed    = Left (FailedToObtain {goal = "seedNoun", result = "none"})
+        failed    = Left (genFail "seedNoun" "none")
         succeeded = Right
 
 
-viableDefinitions :: String -> IO (Either (FailedGen (Maybe [Definition])) [Definition])
+viableDefinitions :: String -> IO (Either FailedGen [Definition])
 viableDefinitions seedNoun =
     do
         results <- wapiEntryFor seedNoun
         case results of
-            Nothing   -> return $ Left (FailedToObtain {goal = "viableDefinitions", result = Nothing})
+            Nothing   -> return $ Left (genFail "viableDefinitions" "Nothing")
             Just defs -> return $ nounsWithTypes defs
     where
         nounsWithTypes defs = let d1:nouns = filter isNoun defs
                               in case filter withTypes nouns of
-                                     []        -> Left  (FailedToObtain {goal = "viableDefinitions", result = Just defs})
+                                     []        -> Left  (genFail "viableDefinitions" defs)
                                      otherwise -> Right (d1:nouns)
 
 
@@ -78,15 +83,15 @@ randTypeVariant (_:defs) = randItem . concat . catMaybes $ defTypes
         defTypes = map hasTypes defs ++ map typeOf defs
         
         
-getComplement :: String -> String -> IO (Either (FailedGen (Maybe String)) String)
-getComplement typeVariant randPrep =
+getComplement :: String -> String -> IO (Either FailedGen String)
+getComplement randPrep typeVariant  =
     do
         let searchTerm = typeVariant ++ " " ++ randPrep
-        result <- (fmap unwords . search . quoteStr) searchTerm
+        result <- (fmap unwords . Twitter.search . quoteStr) searchTerm
         let complementMatch = (listAfterInfix searchTerm result)
         maybe failed succeeded complementMatch
     where
-        failed = return $ Left (FailedToObtain {goal = "viableComplement", result = Nothing})
+        failed = return $ Left (genFail "viableComplement" "Nothing")
         succeeded txt = do
             complementWords <- (takeUptoIO queryIsNoun . words) txt
             return $ Right (unwords complementWords)
@@ -102,13 +107,18 @@ quoteStr s = "\"" ++ s ++ "\""
 
 -- GEN ATTEMP FAILURE HANDLING:
 
-data FailedGen a = FailedToObtain {goal :: String, result :: a} deriving Show
+data FailedGen = FailedToObtain String String
+               deriving Show
 
-logFailure :: Show a => FailedGen a -> IO ()
-logFailure err = (putStrLn . concat) [">>> Failed to obtain:\n    `", (goal err), "`\n",
-                                      ">>> Instead obtained:\n    ", ((show . result) err)]
+genFail :: Show a => String -> a -> FailedGen
+genFail goal result = FailedToObtain goal (show result)
 
-genFailedRedo :: Show a => FailedGen a -> IO (TitleParts)
+logFailure :: FailedGen -> IO ()
+logFailure (FailedToObtain goal result) =
+    (putStrLn . concat) [">>> Failed to obtain:\n    `", goal, "`\n",
+                         ">>> Instead obtained:\n    ",  result]
+
+genFailedRedo :: FailedGen -> IO (TitleParts)
 genFailedRedo err =  do logFailure err
                         threadDelay 500000
                         getTitleParts

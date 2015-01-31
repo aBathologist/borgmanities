@@ -23,8 +23,9 @@ import secrets
 # Command line parser:
 def build_parser():
     parser = argparse.ArgumentParser(description="BotticelliBot's sloppy python appendage for twitter searches and posts.")
-    parser.add_argument('-s', '--search', action='store_true', help="Search twitter for argument")
-    parser.add_argument('search_term', help="The term to search for, passed with the -s flag")
+    parser.add_argument('-s', '--search', action='store_true', help="Search twitter for input_text")
+    parser.add_argument('input_text', help="The text to be acted on")
+    parser.add_argument('-t', '--tweet', action='store_true', help="Tweet to twitter with input_text")
     return parser
 
 # Returns an twitter api object
@@ -33,9 +34,16 @@ def twitterApi() :
     auth.set_access_token(secrets.access_token, secrets.access_token_secret)
     return tweepy.API(auth)
 
-# apiObejct -> queryString -> twitterObjects
+# apiObject -> queryString -> twitterObjects
 def search_twitter(twitterApi, q):
     return twitterApi.search(q, "en", "en", 20)
+
+# apiObject -> text -> *PostsTweet
+def tweet_twitter(twitterApi, t):
+    if len(t) > 140 :
+        raise NameError("Tweet too long: must be =< 140 chars; tried to tweet: `" + t + "`")
+    else:
+        twitterApi.update_status(t)
 
 # string -> normalizedString
 def normalize_string(term, s):
@@ -45,11 +53,12 @@ def normalize_string(term, s):
 
 if __name__ == '__main__':
     args = build_parser().parse_args()
-    
+    api  = twitterApi()
     if args.search :
-        term       = args.search_term
-        tweets     = search_twitter(twitterApi(), term)
+        term       = args.input_text
+        tweets     = search_twitter(api, term)
         tweet_text = ' '.join(t.text for t in tweets)
         print(normalize_string(term, tweet_text))
-
-
+    elif args.tweet :
+        text = args.input_text
+        tweet_twitter(api, text)

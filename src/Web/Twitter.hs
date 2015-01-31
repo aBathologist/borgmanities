@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Web.Twitter (search) where
+module Web.Twitter
+       ( search
+       , tweet
+       ) where
 
 import System.Process
    
@@ -8,6 +11,13 @@ import System.Process
 -- It is made into it's own module as a promise that I'll replace the python with a proper haskell
 -- implementation.
 
-search :: String -> IO [String]
-search str = fmap words (readProcess "python/twitter.py" ["-s", str] [])
+twitterPy :: String
+twitterPy = "python/twitter.py"
 
+search :: String -> IO [String]
+search str = fmap words (readProcess twitterPy ["-s", str] [])
+
+tweet :: String -> Either String (IO String)
+tweet str = if length str > 140
+                then Left "String is too long to tweet: must be less than 140 chars."
+                else Right (readProcess twitterPy ["-t", str] [])
