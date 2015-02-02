@@ -8,6 +8,7 @@ import PaperTitleGen.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
 
+import Data.Either
 import Data.Maybe
 import Data.List
 import Control.Concurrent
@@ -20,31 +21,47 @@ import Test.QuickCheck (generate, elements)
     
 -- TODO: add safety mechanism so it won't get trapped in endless cycle
 --       e.g., return erros and quit if fails n times.
-    
-getTitleParts :: IO TitleParts
-getTitleParts = do
+getTitleParts :: IO (Maybe TitleParts)
+getTitleParts = getTitleParts' 0
+
+getTitleParts' :: Int -> IO (Maybe TitleParts)
+getTitleParts' n
+    | n > 100   = return Nothing
+    | otherwise = do
+          result <- tryGetTitleParts
+          either (genFailRedo n) (return . Just) result
+    where
+        genFailRedo n err = do logFailure n err
+                               threadDelay 500000
+                               getTitleParts' (n + 1)
+                               
+                                 
+          
+
+tryGetTitleParts :: IO (Either FailedGen TitleParts)
+tryGetTitleParts = do
     eitherSeedNoun <- getSeedNoun
     case eitherSeedNoun of
-        Left  err      -> genFailedRedo err
+        Left  err      -> return (Left err)
         Right seedNoun ->
             do
             eitherDefs <- viableDefinitions seedNoun
             case eitherDefs of
-                Left  err  -> genFailedRedo err
+                Left  err  -> return (Left err)
                 Right defs ->
                     do
                     typeVariant      <- randTypeVariant defs
                     randPrep         <- randPreposition
                     eitherComplement <- getComplement randPrep typeVariant
                     case eitherComplement of
-                        Left err         -> genFailedRedo err
+                        Left err         -> return (Left err)
                         Right complement -> 
-                            return TitleParts { seedNoun    = seedNoun
-                                              , typeVariant = typeVariant
-                                              , randPrep    = randPrep
-                                              , definition  = def (head defs)
-                                              , complement  = complement
-                                              }
+                            (return . Right) TitleParts { seedNoun    = seedNoun
+                                                        , typeVariant = typeVariant
+                                                        , randPrep    = randPrep
+                                                        , definition  = def (head defs)
+                                                        , complement  = complement
+                                                        }
 
 -- assembleTitleParts :: [Either FailedGen ]
 -- assembleTitleParts =
@@ -113,15 +130,16 @@ data FailedGen = FailedToObtain String String
 genFail :: Show a => String -> a -> FailedGen
 genFail goal result = FailedToObtain goal (show result)
 
-logFailure :: FailedGen -> IO ()
-logFailure (FailedToObtain goal result) =
-    (putStrLn . concat) [">>> Failed to obtain:\n    `", goal, "`\n",
+logFailure :: Int -> FailedGen -> IO ()
+logFailure n (FailedToObtain goal result) =
+    (putStrLn . concat) ["Attempt: ", (show n), "\n",
+                         ">>> Failed to obtain:\n    `", goal, "`\n",
                          ">>> Instead obtained:\n    ",  result]
 
-genFailedRedo :: FailedGen -> IO (TitleParts)
-genFailedRedo err =  do logFailure err
-                        threadDelay 500000
-                        getTitleParts
+-- genFailedRedo :: FailedGen -> IO (TitleParts)
+-- genFailedRedo err =  do logFailure err
+--                         threadDelay 500000
+--                         getTitleParts
 
 
 

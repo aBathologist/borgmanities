@@ -62,3 +62,4 @@ if __name__ == '__main__':
     elif args.tweet :
         text = args.input_text
         tweet_twitter(api, text)
+        print("Tweeted:" + text)
