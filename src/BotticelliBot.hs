@@ -7,17 +7,14 @@ import PaperTitleGen.IO
 import qualified Web.Twitter as Twitter
 
 main :: IO ()
-main = putStrLn "temp"-- =<< makePaperTitle 
+main = tweetTitle 
+
 
 testPaperTitle :: IO String
 testPaperTitle = do
     result <- getTitleParts
     return $ maybe "Failed" generateTitle result
-    
--- makePaperTitle :: IO String
--- makePaperTitle = do
---     result <- getTitleParts
---     fmap generateTitle result
+
 
 tweetTitle :: IO ()
 tweetTitle = do

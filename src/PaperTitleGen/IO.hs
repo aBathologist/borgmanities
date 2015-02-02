@@ -13,17 +13,12 @@ import Data.Maybe
 import Data.List
 import Control.Concurrent
 import Test.QuickCheck (generate, elements)
-    
--- TODO:
--- # add logging system so I can see what's going on
---   (this should become a standard part of my creation process)
--- # regigger thingy so that is uses Data.Text instead of String?
-    
--- TODO: add safety mechanism so it won't get trapped in endless cycle
---       e.g., return erros and quit if fails n times.
+
 getTitleParts :: IO (Maybe TitleParts)
 getTitleParts = getTitleParts' 0
 
+-- an auxiliary function for getTitleParts. The Int argument is to
+-- put an upper limit on the amount of attempts made. Set too 100.
 getTitleParts' :: Int -> IO (Maybe TitleParts)
 getTitleParts' n
     | n > 100   = return Nothing
@@ -36,8 +31,11 @@ getTitleParts' n
                                getTitleParts' (n + 1)
                                
                                  
-          
-
+-- This is the main function for putting together the various
+-- IO operations needed to gather the parts of the TitleParts
+-- data type.
+-- At some point, I would like to clean this up, as I'm sure there's
+-- a better way to handle the error detection/control flow.
 tryGetTitleParts :: IO (Either FailedGen TitleParts)
 tryGetTitleParts = do
     eitherSeedNoun <- getSeedNoun
@@ -62,10 +60,6 @@ tryGetTitleParts = do
                                                         , definition  = def (head defs)
                                                         , complement  = complement
                                                         }
-
--- assembleTitleParts :: [Either FailedGen ]
--- assembleTitleParts =
---     [getSeedNoun, viableDefinitions, randTypeVariant, ]
 
 
 getSeedNoun :: IO (Either FailedGen String)
@@ -113,7 +107,7 @@ getComplement randPrep typeVariant  =
             complementWords <- (takeUptoIO queryIsNoun . words) txt
             return $ Right (unwords complementWords)
 
-
+-- Aux functions for getComplement
 listAfterInfix :: Eq a => [a] -> [a] -> Maybe [a]
 listAfterInfix ps = fromMaybe Nothing . find isJust . map (stripPrefix  ps) . tails
 
@@ -135,11 +129,6 @@ logFailure n (FailedToObtain goal result) =
     (putStrLn . concat) ["Attempt: ", (show n), "\n",
                          ">>> Failed to obtain:\n    `", goal, "`\n",
                          ">>> Instead obtained:\n    ",  result]
-
--- genFailedRedo :: FailedGen -> IO (TitleParts)
--- genFailedRedo err =  do logFailure err
---                         threadDelay 500000
---                         getTitleParts
 
 
 
