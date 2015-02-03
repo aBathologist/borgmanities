@@ -17,15 +17,17 @@ import Test.QuickCheck (generate, elements)
 getTitleParts :: IO (Maybe TitleParts)
 getTitleParts = getTitleParts' 0
 
--- an auxiliary function for getTitleParts. The Int argument is to
--- put an upper limit on the amount of attempts made. Set too 100.
+-- an auxiliary function for getTitleParts. The Int argument is used to
+-- enforce an upper limit on the amount of attempts made.
+
 getTitleParts' :: Int -> IO (Maybe TitleParts)
 getTitleParts' n
-    | n > 100   = return Nothing
+    | n > permittedAtempts = return Nothing
     | otherwise = do
           result <- tryGetTitleParts
           either (genFailRedo n) (return . Just) result
     where
+        permittedAtempts  = 100
         genFailRedo n err = do logFailure n err
                                threadDelay 500000
                                getTitleParts' (n + 1)

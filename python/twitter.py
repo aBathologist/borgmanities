@@ -57,8 +57,9 @@ if __name__ == '__main__':
     if args.search :
         term       = args.input_text
         tweets     = search_twitter(api, term)
-        tweet_text = ' '.join(t.text for t in tweets)
+        tweet_text = '\n'.join(t.text for t in tweets)
         print(normalize_string(term, tweet_text))
+        # print(tweet_text)
     elif args.tweet :
         text = args.input_text
         tweet_twitter(api, text)
