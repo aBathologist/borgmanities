@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module PaperTitleGen.IO
+module PaperTitle.IO
        ( getTitleParts )
        where
 
-import PaperTitleGen.Gen
+import PaperTitle.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
 

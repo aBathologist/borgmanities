@@ -2,8 +2,8 @@ module BotticelliBot
        ( main )
        where
 
-import PaperTitleGen.Gen
-import PaperTitleGen.IO
+import PaperTitle.Gen
+import PaperTitle.IO
 import qualified Web.Twitter as Twitter
 
 main :: IO ()

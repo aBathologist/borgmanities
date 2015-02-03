@@ -1,4 +1,4 @@
-module PaperTitleGen.Gen
+module PaperTitle.Gen
        ( generateTitle
        , testGenerate -- TEMP: for dev use
        , TitleParts(..) 
