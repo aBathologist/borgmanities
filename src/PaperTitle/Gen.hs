@@ -1,9 +1,10 @@
 module PaperTitle.Gen
        ( generateTitle
-       , testGenerate -- TEMP: for dev use
        , TitleParts(..) 
        ) where
 
+import Data.Char
+import Data.List
 -- TODO: Turn into a pure environment for building up a title.
 data TitleParts = TitleParts
                   { seedNoun    :: String
@@ -16,11 +17,64 @@ data TitleParts = TitleParts
 -- Todo:
 -- returns the string to be tweeted.
 generateTitle :: TitleParts -> String
-generateTitle titleParts = show titleParts
+generateTitle t = title ++ ": " ++ subtitle
+    where
+        def     = definition t
+        typeVar = typeVariant t
+        prep    = randPrep t
+        comp    = complement t
+        
+        title    = (toTitleCase . dropCoordinatedClause . dropAfterPunctuation . withoutParenPhrase) def
+        subtitle = (toTitleCase . unwords) ["The", typeVar, prep, comp]
 
 
+-- TRIM AND MANICURE TITLE PARTS
 
--- TEMP: for dev use
+-- Remove parenthesized phrases
+withoutParenPhrase :: String -> String
+withoutParenPhrase str = preParens ++ postParens
+    where
+        (preParens, mid) = break ('(' ==) str
+        (_, rest) = break (')' ==) mid
+        postParens = if (not . null) rest
+                        then drop 1 rest
+                        else rest
+
+-- Drop after and/or/of
+dropCoordinatedClause :: String -> String
+dropCoordinatedClause = unwords . takeWhile (not . coordinator) . words
+    where
+        coordinator = (`elem` ["and", "or"])
+
+-- Drop after punctuation
+dropAfterPunctuation :: String -> String
+dropAfterPunctuation = takeWhile (not . punctuation)
+    where
+        punctuation = (`elem` [';', ',', ':', '.'])
+
+-- Title Case Conversion:
+-- Using this as a guide: https://owl.english.purdue.edu/owl/resource/747/05/
+
+toTitleCase :: String -> String
+toTitleCase str = (unwords . (first :) . map capitalize) rest
+    where
+        ((f:irst):rest) = words str
+        first = (toUpper f) : irst
+        capitalize w@(c:cs) = if w `elem` dontCapitalize
+                                then w
+                                else (toUpper c) : cs
+                               
+dontCapitalize, prepositions, articles, conjunctions :: [String]
+dontCapitalize = prepositions ++ articles ++ conjunctions
+prepositions = ["about","across","amid","as","at", "by",
+                "for","from","in","into","opposite", "over","past","per","through","to",
+                "toward","towards","until","upon","versus","via","with","within","without"]
+articles     = ["a", "the", "an"]
+conjunctions = ["and","that","but","or","as","if","when","than","because",
+                "while","where","after","so","though","since","until","whether",
+                "before","although","nor","like","once","unless","now","except"]
+
+-- For development:
 --  These definitions are for testing generateTitle without having
 --  to run the full operations to generate title parts.
 --  write the algorithm in generateTitle and then run testGenerate
