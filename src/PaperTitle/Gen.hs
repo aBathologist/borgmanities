@@ -44,7 +44,7 @@ withoutParenPhrase str = preParens ++ postParens
 dropCoordinatedClause :: String -> String
 dropCoordinatedClause = unwords . takeWhile (not . coordinator) . words
     where
-        coordinator = (`elem` ["and", "or"])
+        coordinator = (`elem` ["and", "with", "having"])
 
 -- Drop after punctuation
 dropAfterPunctuation :: String -> String

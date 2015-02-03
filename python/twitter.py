@@ -4,6 +4,7 @@ import tweepy
 import argparse
 import string
 import secrets
+import re
 
 ## This code is a helper program for the BotticelliBot Haskell program.
 ## It was written because figuring out how to interface with the twitter api
@@ -47,9 +48,10 @@ def tweet_twitter(twitterApi, t):
 
 # string -> normalizedString
 def normalize_string(term, s):
-    transtable = {ord(c): ' ' for c in string.punctuation.replace("'",'')}
-    transtable[ord('\n')] = ' '
-    return s.translate(transtable).replace(term, ' ').lower()
+    transtable = {ord(c): ' ' for c in string.punctuation.replace("'",'')} # strip punctuation
+    transtable[ord('\n')] = ' '                                            # join lines
+    s = re.sub(r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', s) # remove urls
+    return s.translate(transtable).lower()                                 # to lower case
 
 if __name__ == '__main__':
     args = build_parser().parse_args()

@@ -8,6 +8,7 @@ import PaperTitle.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
 
+import System.IO
 import Data.Either
 import Data.Maybe
 import Data.List
@@ -29,7 +30,7 @@ getTitleParts' n
     where
         permittedAtempts  = 100
         genFailRedo n err = do logFailure n err
-                               threadDelay 500000
+                               -- threadDelay 500000
                                getTitleParts' (n + 1)
                                
                                  

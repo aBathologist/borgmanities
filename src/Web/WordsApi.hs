@@ -32,7 +32,8 @@ wapiEntryFor query = do
     case wapiResultOfStr jsonStr of
         Just (WapiResult definitions) ->
             return (Just definitions)
-        otherwise ->
+        otherwise -> do
+            putStrLn ">>> Failed to obtain information from WordsApi"
             return Nothing
 
 
@@ -51,7 +52,7 @@ curlGetWapiQuery query = do
     (curlCode, jsonStr) <- (curlGetString (wapiQuery query token) [])
     case curlCode of
         CurlOK -> return jsonStr
-        errStr -> return (show errStr)      -- Returns the error code if the GET request goes wrong.
+        errStr -> return (show errStr) -- Returns the error code if the GET request goes wrong.
 
 
 -- Parsing the JSON Data
