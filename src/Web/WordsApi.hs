@@ -8,12 +8,20 @@ module Web.WordsApi
 import Control.Lens
 
 import Network.Curl
+
 import Data.Aeson
 import Control.Applicative
 import Control.Monad
 import Data.String.Conversions
 import qualified Data.HashMap.Strict as Hash
 
+import Web.SimpleHTTPConduit
+
+-- import Network.HTTP.Conduit
+-- import qualified Network.HTTP.Types.Header as Header
+-- import Network.Connection (TLSSettings (..))
+import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Char8 as S
 import Secrets
 
 {--
@@ -28,15 +36,14 @@ TODO: explain....
 
 wapiEntryFor :: String -> IO (Maybe [Definition])
 wapiEntryFor query = do
-    jsonStr <- curlGetWapiQuery query
-    case wapiResultOfStr jsonStr of
-        Just (WapiResult definitions) ->
-            return (Just definitions)
-        otherwise -> do
-            putStrLn ">>> Failed to obtain information from WordsApi"
-            return Nothing
-
-
+    maybeJson <- getWapiQuery query
+    case maybeJson of
+        Nothing   -> return Nothing
+        Just json ->
+            case wapiResultFromJson json of
+                Just (WapiResult defs) -> (return . Just) defs
+                otherwise -> return Nothing
+        
 
 -- Requesting data from WordsApi (aka "Wapi")
 
@@ -54,11 +61,29 @@ curlGetWapiQuery query = do
         CurlOK -> return jsonStr
         errStr -> return (show errStr) -- Returns the error code if the GET request goes wrong.
 
+token = (cs . secret) Secrets.wapiToken
+wapiEndPoint = "https://wordsapiv1.p.mashape.com/words/"
+
+-- getWapiQuery :: String -> IO L.ByteString
+getWapiQuery q = do
+    let header = [("X-Mashape-Key", token), ("Accept", "application/json")]
+    result <- getSecureBody wapiEndPoint q header
+    case result of
+        Right body  -> (return . Just) body
+        Left status -> do putStrLn (">>> Failed to find Query: " ++ show status)
+                          return Nothing
+
+getWapiResponse q = do
+    let header = [("X-Mashape-Key", token), ("Accept", "application/json")]
+    getSecure wapiEndPoint q header
 
 -- Parsing the JSON Data
 
 wapiResultOfStr :: String -> Maybe WapiResult
 wapiResultOfStr = (decode . cs)
+
+wapiResultFromJson :: L.ByteString -> Maybe WapiResult
+wapiResultFromJson =  decode
 
 -- TODO: Add in fields for the entire wapi return structure.
 data Definition = Definition

@@ -65,7 +65,11 @@ executable BotticelliBot
                        QuickCheck >= 2.7.6,
                        text,
                        lens,
-                       process
+                       process,
+                       http-conduit,
+                       connection,
+                       bytestring,
+                       http-types
   
   -- Directories containing source files.
   hs-source-dirs:      src
