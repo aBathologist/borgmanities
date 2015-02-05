@@ -1,6 +1,6 @@
 # Borgmanities
 
-*Resistance is facile.*
+    Resistance is facile.
 
 This project is for fun and learning. We are currently working on a
 twitter bot in Haskell (plus a touch of python), but may expand in any
