@@ -30,7 +30,6 @@ getTitleParts' n
     where
         permittedAtempts  = 100
         genFailRedo n err = do logFailure n err
-                               -- threadDelay 500000
                                getTitleParts' (n + 1)
                                
                                  

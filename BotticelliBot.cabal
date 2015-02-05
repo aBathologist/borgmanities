@@ -62,14 +62,15 @@ executable BotticelliBot
                        curl, 
                        aeson,
                        string-conversions, 
-                       QuickCheck >= 2.7.6,
+                       QuickCheck >=2.7.6,
                        text,
                        lens,
                        process,
                        http-conduit,
                        connection,
                        bytestring,
-                       http-types
+                       http-types,
+                       regex-compat >=0.95
   
   -- Directories containing source files.
   hs-source-dirs:      src

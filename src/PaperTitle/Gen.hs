@@ -5,6 +5,8 @@ module PaperTitle.Gen
 
 import Data.Char
 import Data.List
+import Text.Regex
+
 -- TODO: Turn into a pure environment for building up a title.
 data TitleParts = TitleParts
                   { seedNoun    :: String
@@ -32,19 +34,19 @@ generateTitle t = title ++ ": " ++ subtitle
 
 -- Remove parenthesized phrases
 withoutParenPhrase :: String -> String
-withoutParenPhrase str = preParens ++ postParens
+withoutParenPhrase str = subRegex re str ""
     where
-        (preParens, mid) = break ('(' ==) str
-        (_, rest) = break (')' ==) mid
-        postParens = if (not . null) rest
-                        then drop 1 rest
-                        else rest
+        re = mkRegex "\\(.*\\)"
 
 -- Drop after and/or/of
 dropCoordinatedClause :: String -> String
-dropCoordinatedClause = unwords . takeWhile (not . coordinator) . words
+dropCoordinatedClause str =
+    if (length ws) > 4
+        then (unwords . takeWhile (not . coordinator)) ws
+        else unwords ws
     where
-        coordinator = (`elem` ["and", "with", "having"])
+        ws = words str
+        coordinator = (`elem` ["or", "with", "having", "and"])
 
 -- Drop after punctuation
 dropAfterPunctuation :: String -> String

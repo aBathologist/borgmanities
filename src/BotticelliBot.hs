@@ -10,10 +10,10 @@ main :: IO ()
 main = tweetTitle 
 
 
-testPaperTitle :: IO String
+testPaperTitle :: IO (Maybe TitleParts, String)
 testPaperTitle = do
     result <- getTitleParts
-    return $ maybe "Failed" generateTitle result
+    return $ (result, maybe "Failed" generateTitle result)
 
 
 tweetTitle :: IO ()

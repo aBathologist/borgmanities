@@ -47,21 +47,26 @@ def tweet_twitter(twitterApi, t):
         twitterApi.update_status(t)
 
 # string -> normalizedString
-def normalize_string(term, s):
+def normalize_string(s):
     transtable = {ord(c): ' ' for c in string.punctuation.replace("'",'')} # strip punctuation
     transtable[ord('\n')] = ' '                                            # join lines
-    s = re.sub(r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', s) # remove urls
-    return s.translate(transtable).lower()                                 # to lower case
+    text = strip_twitterspeak(s)
+    return text.translate(transtable).lower()                              # to lower case
+
+def strip_twitterspeak(s):
+    return re.sub(r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*|#[\w-]+|@[\w-]+|RT|[^\u0000-\u02D0]', '', s) # remove urls, hash tags, @tags, RT
+    
 
 if __name__ == '__main__':
     args = build_parser().parse_args()
     api  = twitterApi()
+    
     if args.search :
         term       = args.input_text
         tweets     = search_twitter(api, term)
         tweet_text = '\n'.join(t.text for t in tweets)
-        print(normalize_string(term, tweet_text))
-        # print(tweet_text)
+        print(normalize_string(tweet_text))
+
     elif args.tweet :
         text = args.input_text
         tweet_twitter(api, text)
