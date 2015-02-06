@@ -46,5 +46,9 @@ blacklist =
      "raghead",
      "negro",
      "hooker",
-     "redskin"
+     "redskin",
+     "i'm",
+     "me",
+     "you",
+     "i"
     ]
