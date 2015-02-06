@@ -4,19 +4,33 @@ module PaperTitle.IO
        ( getTitleParts )
        where
 
+import Blacklist
 import PaperTitle.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
 
-import System.IO
 import Data.Either
 import Data.Maybe
 import Data.List
-import Control.Concurrent
+
 import Test.QuickCheck (generate, elements)
 
+-- SETTINGS
+
+prepositionsFile, hashtagsFile, seedNounsFile :: FilePath
+prepositionsFile = "src/resources/prepositions.txt"
+hashtagsFile     = "src/resources/hashtags.txt"
+seedNounsFile    = "src/resources/seedNouns.txt"
+
+
+-- ASSEMBLING TitleParts
+
 getTitleParts :: IO (Maybe TitleParts)
-getTitleParts = getTitleParts' 0
+getTitleParts = do
+    maybeTitleParts <- getTitleParts' 0
+    maybe (return ()) (logSeedNoun . seedNoun) maybeTitleParts
+    return maybeTitleParts
+    
 
 -- an auxiliary function for getTitleParts. The Int argument is used to
 -- enforce an upper limit on the amount of attempts made.
@@ -31,13 +45,15 @@ getTitleParts' n
         permittedAtempts  = 100
         genFailRedo n err = do logFailure n err
                                getTitleParts' (n + 1)
-                               
-                                 
--- This is the main function for putting together the various
--- IO operations needed to gather the parts of the TitleParts
--- data type.
--- At some point, I would like to clean this up, as I'm sure there's
--- a better way to handle the error detection/control flow.
+
+{--
+tryGetTitleParts sequences the various IO operations needed to gather
+the parts of the TitleParts data type.
+
+At some point, I would like to clean this up, as I'm sure there's a
+better way to handle the error detection/control flow.
+--}
+
 tryGetTitleParts :: IO (Either FailedGen TitleParts)
 tryGetTitleParts = do
     eitherSeedNoun <- getSeedNoun
@@ -54,7 +70,7 @@ tryGetTitleParts = do
                     randPrep         <- randPreposition
                     eitherComplement <- getComplement randPrep typeVariant
                     case eitherComplement of
-                        Left err         -> return (Left err)
+                        Left  err        -> return (Left err)
                         Right complement -> 
                             (return . Right) TitleParts { seedNoun    = seedNoun
                                                         , typeVariant = typeVariant
@@ -64,16 +80,21 @@ tryGetTitleParts = do
                                                         }
 
 
+-- GATHERING THE PARTS OF TitleParts
+                        
 getSeedNoun :: IO (Either FailedGen String)
 getSeedNoun =
     do
         results   <- Twitter.search =<< randHashtag
-        maybeNoun <- findIO queryIsNoun results
+        maybeNoun <- findIO viableNoun results
         return $ maybe failed succeeded maybeNoun
     where
+        viableNoun n = andIO (queryIsNoun n) (freshSeedNoun n)
         failed    = Left (genFail "seedNoun" "none")
         succeeded = Right
 
+freshSeedNoun :: String -> IO Bool
+freshSeedNoun str = (fmap (not . elem str) seedNouns)
 
 viableDefinitions :: String -> IO (Either FailedGen [Definition])
 viableDefinitions seedNoun =
@@ -102,8 +123,12 @@ getComplement randPrep typeVariant  =
         let searchTerm = typeVariant ++ " " ++ randPrep
         result <- (fmap unwords . Twitter.search . quoteStr) searchTerm
         let complementMatch = (listAfterInfix searchTerm result)
-        maybe failed succeeded complementMatch
+        let cleanComplement = case complementMatch of
+                                  Nothing -> Nothing
+                                  Just c  -> maybeIs includesBlacklistedWord c
+        maybe failed succeeded cleanComplement
     where
+        includesBlacklistedWord = (not . any (flip elem blacklist) . words)
         failed = return $ Left (genFail "viableComplement" "Nothing")
         succeeded txt = do
             complementWords <- (takeUptoIO queryIsNoun . words) txt
@@ -117,8 +142,12 @@ quoteStr :: String -> String
 quoteStr s = "\"" ++ s ++ "\""
 
 
+maybeIs :: (a -> Bool) -> a -> Maybe a
+maybeIs p a = if p a
+              then Just a
+              else Nothing
 
--- GEN ATTEMP FAILURE HANDLING:
+-- GEN FAILURE HANDLING AND LOGGING:
 
 data FailedGen = FailedToObtain String String
                deriving Show
@@ -132,7 +161,11 @@ logFailure n (FailedToObtain goal result) =
                          ">>> Failed to obtain:\n    `", goal, "`\n",
                          ">>> Instead obtained:\n    ",  result]
 
+logSeedNoun :: String -> IO ()
+logSeedNoun = appendFile seedNounsFile . (++ "\n")
 
+seedNouns :: IO [String]
+seedNouns = fmap lines (readFile seedNounsFile)
 
 -- TESTING FOR DEFINITION PARTS ETC.
 
@@ -167,6 +200,12 @@ takeUptoIO f l = case l of
                     as <- takeUptoIO f xs
                     return (a:as)
     
+andIO :: IO Bool -> IO Bool -> IO Bool
+andIO a b = do
+    aBool <- a
+    bBool <- b
+    return (aBool && bBool)
+
 -- Querries api with a string, and returns True if the string
 -- has noun definition.
 queryIsNoun :: String -> IO Bool
@@ -182,10 +221,6 @@ inBlackList :: String -> Bool
 inBlackList w = w `elem` ["http", "then"]
 
 -- MAKING RANDOM SELECTIONS
-
-prepositionsFile, hashtagsFile :: String
-prepositionsFile = "src/resources/prepositions.txt"
-hashtagsFile     = "src/resources/hashtags.txt"
  
 randPreposition, randHashtag :: IO String
 randPreposition = randItem =<< fmap lines (readFile prepositionsFile)

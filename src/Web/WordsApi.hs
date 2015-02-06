@@ -55,9 +55,10 @@ getWapiQuery q = do
     result <- getSecureBody wapiEndPoint q header
     case result of
         Right body  -> (return . Just) body
-        Left status -> do putStrLn (">>> Failed to find Query: " ++ show status)
+        Left status -> do putStrLn (">>> Wapi query failed to find entry for `" ++ q ++ "`: " ++ show status)
                           return Nothing
 
+-- This returns the whole http resonse, including the headers.
 getWapiResponse q = do
     let header = [("X-Mashape-Key", token), ("Accept", "application/json")]
     getSecure wapiEndPoint q header

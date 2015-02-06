@@ -1,0 +1,50 @@
+module Blacklist
+       ( blacklist ) where
+
+-- Words the bot should not say:
+-- Modified from: https://github.com/dariusk/wordfilter/blob/master/lib/badwords.json
+
+blacklist =
+    ["skank",
+     "wetback",
+     "bitch",
+     "cunt",
+     "fag",
+     "nigger",
+     "tranny",
+     "trannies",
+     "paki",
+     "pussy",
+     "retard",
+     "slut",
+     "wop",
+     "whore",
+     "chink",
+     "fatass",
+     "shemale",
+     "daygo",
+     "dego",
+     "dago",
+     "gook",
+     "kike",
+     "kraut",
+     "spic",
+     "twat",
+     "lesbo",
+     "homo",
+     "fatso",
+     "lardass",
+     "jap",
+     "biatch",
+     "tard",
+     "gimp",
+     "gyp",
+     "chinaman",
+     "chinamen",
+     "golliwog",
+     "crip",
+     "raghead",
+     "negro",
+     "hooker",
+     "redskin"
+    ]
