@@ -46,7 +46,7 @@ dropCoordinatedClause str =
         else unwords ws
     where
         ws = words str
-        coordinator = (`elem` ["or", "with", "having", "and", "as"])
+        coordinator = (`elem` ["especially", "with", "having", "and", "or", "as", "used"])
 
 -- Drop after punctuation
 dropAfterPunctuation :: String -> String

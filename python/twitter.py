@@ -37,7 +37,7 @@ def twitterApi() :
 
 # apiObject -> queryString -> twitterObjects
 def search_twitter(twitterApi, q):
-    return twitterApi.search(q, "en", "en", 20)
+    return twitterApi.search(q, "en", "en", 40)
 
 # apiObject -> text -> *PostsTweet
 def tweet_twitter(twitterApi, t):
@@ -54,7 +54,7 @@ def normalize_string(s):
     return text.translate(transtable).lower()                              # to lower case
 
 def strip_twitterspeak(s):
-    return re.sub(r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*|#[\w-]+|@[\w-]+|RT|[^\u0000-\u02D0]', '', s) # remove urls, hash tags, @tags, RT
+    return re.sub(r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*|#[\w-]+|@[\w-]+|RT|icymi|CFP|ICYMI|[^\u0000-\u02D0]', '', s) # remove urls, hash tags, @tags, RT, etc.
     
 
 if __name__ == '__main__':

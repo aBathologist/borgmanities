@@ -4,7 +4,9 @@ module PaperTitle.IO
        ( getTitleParts )
        where
 
-import Blacklist
+import Parse.Blacklist
+import Parse.Singularize
+
 import PaperTitle.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
@@ -12,6 +14,7 @@ import qualified Web.Twitter as Twitter
 import Data.Either
 import Data.Maybe
 import Data.List
+import Control.Applicative
 
 import Test.QuickCheck (generate, elements)
 
@@ -70,7 +73,7 @@ tryGetTitleParts = do
                     randPrep         <- randPreposition
                     eitherComplement <- getComplement randPrep typeVariant
                     case eitherComplement of
-                        Left  err        -> return (Left err)
+                        Left  err        -> (return . Left) err
                         Right complement -> 
                             (return . Right) TitleParts { seedNoun    = seedNoun
                                                         , typeVariant = typeVariant
@@ -89,7 +92,7 @@ getSeedNoun =
         maybeNoun <- findIO viableNoun results
         return $ maybe failed succeeded maybeNoun
     where
-        viableNoun n = andIO (queryIsNoun n) (freshSeedNoun n)
+        viableNoun n = (&&) <$> (queryIsNoun n) <*> (freshSeedNoun n)
         failed    = Left (genFail "seedNoun" "none")
         succeeded = Right
 
@@ -179,6 +182,9 @@ withTypes def = isJust t1 || isJust t2
         t1 = hasTypes def
         t2 = typeOf def
 
+
+-- TODO: Implement these via applicative!
+        
 -- findIO is just like find, but uses a predicate that returns
 -- its boolean wrapped in the IO monad. Needed to work with
 -- queryIsNoun.
@@ -200,12 +206,6 @@ takeUptoIO f l = case l of
                     as <- takeUptoIO f xs
                     return (a:as)
     
-andIO :: IO Bool -> IO Bool -> IO Bool
-andIO a b = do
-    aBool <- a
-    bBool <- b
-    return (aBool && bBool)
-
 -- Querries api with a string, and returns True if the string
 -- has noun definition.
 queryIsNoun :: String -> IO Bool
@@ -213,7 +213,7 @@ queryIsNoun s
     | length s < 3 || inBlackList s =  -- no blacklisted words, an no words shorter than 3 letters.
           return False  
     | otherwise = do                   -- We want anything else, so long as it can be a noun.
-          result <- wapiEntryFor s
+          result <- wapiEntryFor (singularize s) -- (singularize s)
           return $ maybe False (any isNoun) result
 
 -- Temp: Black list will need refinement.
