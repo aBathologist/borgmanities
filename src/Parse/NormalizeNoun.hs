@@ -7,12 +7,14 @@ import qualified Data.List as List
 
 type IrregularNouns = Map.HashMap String String
 
+-- I will want to implement this eventually,
+-- but only once I can run the hashmap through the program.
 irregularNouns :: IrregularNouns
 irregularNouns = Map.fromList irregularPlurals
 
--- singularize :: IrregularNouns -> String -> String
+normalizeNoun :: String -> String
 normalizeNoun noun =
-    case Map.lookup noun irregularNouns of
+    case lookup noun irregularPlurals of
         Just sing -> sing
         Nothing   -> stem noun
 

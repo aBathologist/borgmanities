@@ -5,7 +5,7 @@ module PaperTitle.IO
        where
 
 import Parse.Blacklist
-import Parse.Singularize
+import Parse.NormalizeNoun
 
 import PaperTitle.Gen
 import Web.WordsApi
@@ -14,8 +14,10 @@ import qualified Web.Twitter as Twitter
 import Data.Either
 import Data.Maybe
 import Data.List
+    
 import Control.Applicative
-
+import Control.Monad.Loops
+    
 import Test.QuickCheck (generate, elements)
 
 -- SETTINGS
@@ -33,7 +35,7 @@ getTitleParts = do
     maybeTitleParts <- getTitleParts' 0
     maybe (return ()) (logSeedNoun . seedNoun) maybeTitleParts
     return maybeTitleParts
-    
+
 
 -- an auxiliary function for getTitleParts. The Int argument is used to
 -- enforce an upper limit on the amount of attempts made.
@@ -89,7 +91,7 @@ getSeedNoun :: IO (Either FailedGen String)
 getSeedNoun =
     do
         results   <- Twitter.search =<< randHashtag
-        maybeNoun <- findIO viableNoun results
+        maybeNoun <- firstM viableNoun results
         return $ maybe failed succeeded maybeNoun
     where
         viableNoun n = (&&) <$> (queryIsNoun n) <*> (freshSeedNoun n)
@@ -118,26 +120,24 @@ randTypeVariant :: [Definition] -> IO String
 randTypeVariant (_:defs) = randItem . concat . catMaybes $ defTypes
     where
         defTypes = map hasTypes defs ++ map typeOf defs
-        
-        
+       
 getComplement :: String -> String -> IO (Either FailedGen String)
-getComplement randPrep typeVariant  =
+getComplement typeVariant randPrep  =
     do
-        let searchTerm = typeVariant ++ " " ++ randPrep
-        result <- (fmap unwords . Twitter.search . quoteStr) searchTerm
-        let complementMatch = (listAfterInfix searchTerm result)
-        let cleanComplement = case complementMatch of
-                                  Nothing -> Nothing
-                                  Just c  -> maybeIs includesBlacklistedWord c
-        maybe failed succeeded cleanComplement
+        result       <- searchTwitter searchTerm
+        complement   <- findCompliment (words <$> listAfterInfix searchTerm result)
+        return $ if allSafeWords complement
+                    then Right ((unwords . fromJust) complement)
+                    else Left  (genFail "viablecomplement" (show complement))
     where
-        includesBlacklistedWord = (not . any (flip elem blacklist) . words)
-        failed = return $ Left (genFail "viableComplement" "Nothing")
-        succeeded txt = do
-            complementWords <- (takeUptoIO queryIsNoun . words) txt
-            return $ Right (unwords complementWords)
-
--- Aux functions for getComplement
+        searchTerm     = typeVariant ++ " " ++ randPrep
+        searchTwitter  = (fmap unwords . Twitter.search . quoteStr)
+        findCompliment = maybe (return Nothing) (takeUptoIO' queryIsNoun)
+        allSafeWords   = maybe False safeWords
+        
+safeWords :: [String] -> Bool
+safeWords = (not . any (flip elem blacklist))
+            
 listAfterInfix :: Eq a => [a] -> [a] -> Maybe [a]
 listAfterInfix ps = fromMaybe Nothing . find isJust . map (stripPrefix  ps) . tails
 
@@ -185,16 +185,13 @@ withTypes def = isJust t1 || isJust t2
 
 -- TODO: Implement these via applicative!
         
--- findIO is just like find, but uses a predicate that returns
--- its boolean wrapped in the IO monad. Needed to work with
--- queryIsNoun.
-findIO :: (a -> IO Bool) -> [a] -> IO (Maybe a)
-findIO f l = case l of
-    []     -> return Nothing
-    (a:xs) -> do
-        bool <- f a
-        if bool then return (Just a)
-                else findIO f xs
+takeUptoIO' :: (a -> IO Bool) -> [a] -> IO (Maybe [a])
+takeUptoIO' f l = do i <- findIndexIO f l
+                     let j = fmap (+ 1) i
+                     return (take <$> j <*> Just l)
+    
+findIndexIO :: (a -> IO Bool) -> [a] -> IO (Maybe Int)
+findIndexIO f l = elemIndex True <$> mapM (anyPM [f]) l
 
 takeUptoIO :: (a -> IO Bool) -> [a] -> IO [a]
 takeUptoIO f l = case l of
@@ -210,10 +207,10 @@ takeUptoIO f l = case l of
 -- has noun definition.
 queryIsNoun :: String -> IO Bool
 queryIsNoun s
-    | length s < 3 || inBlackList s =  -- no blacklisted words, an no words shorter than 3 letters.
+    | length s < 3 || inBlackList s =  -- no blacklisted words, and no words shorter than 3 letters.
           return False  
     | otherwise = do                   -- We want anything else, so long as it can be a noun.
-          result <- wapiEntryFor (singularize s) -- (singularize s)
+          result <- wapiEntryFor (normalizeNoun s) -- (singularize s)
           return $ maybe False (any isNoun) result
 
 -- Temp: Black list will need refinement.

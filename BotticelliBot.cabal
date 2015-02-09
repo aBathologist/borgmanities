@@ -70,7 +70,8 @@ executable BotticelliBot
                        connection,
                        bytestring,
                        http-types,
-                       regex-compat >=0.95
+                       regex-compat >=0.95,
+                       monad-loops
   
   -- Directories containing source files.
   hs-source-dirs:      src
