@@ -39,12 +39,13 @@ def twitterApi() :
 def search_twitter(twitterApi, q):
     return twitterApi.search(q, "en", "en", 40)
 
+# TODO: remove "status=" in arg to update_status once bug is fixed in twepy
 # apiObject -> text -> *PostsTweet
 def tweet_twitter(twitterApi, t):
     if len(t) > 140 :
         raise NameError("Tweet too long: must be =< 140 chars; tried to tweet: `" + t + "`")
     else:
-        twitterApi.update_status(t)
+        twitterApi.update_status(status=t)
 
 # string -> normalizedString
 def normalize_string(s):

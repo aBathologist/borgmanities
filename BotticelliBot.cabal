@@ -45,7 +45,6 @@ extra-source-files:  readme.md
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.10
 
-
 executable BotticelliBot
   -- .hs or .lhs file containing the Main module.
   main-is:             BotticelliBot.hs
@@ -59,7 +58,6 @@ executable BotticelliBot
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.7 && <4.8,
                        unordered-containers >=0.2 && <0.3,
-                       curl, 
                        aeson,
                        string-conversions, 
                        QuickCheck >=2.7.6,
