@@ -1,4 +1,4 @@
-module BotticelliBot
+module Main
        ( main )
        where
 
@@ -8,13 +8,6 @@ import qualified Web.Twitter as Twitter
 
 main :: IO ()
 main = tweetTitle 
-
-
-testPaperTitle :: IO (Maybe TitleParts, String)
-testPaperTitle = do
-    result <- getTitleParts
-    return $ (result, maybe "Failed" generateTitle result)
-
 
 tweetTitle :: IO ()
 tweetTitle = do
@@ -26,3 +19,8 @@ tweetTitle = do
             in case Twitter.tweet title of
                    Left err    -> putStrLn err
                    Right tweet -> tweet >>= putStrLn
+
+testPaperTitle :: IO (Maybe TitleParts, String)
+testPaperTitle = do
+    result <- getTitleParts
+    return $ (result, maybe "Failed" generateTitle result)

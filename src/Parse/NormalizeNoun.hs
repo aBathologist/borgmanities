@@ -2,7 +2,6 @@ module Parse.NormalizeNoun
        ( normalizeNoun ) where
 
 import qualified Data.HashMap.Strict as Map
-import Control.Monad
 import qualified Data.List as List
 
 type IrregularNouns = Map.HashMap String String

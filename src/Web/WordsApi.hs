@@ -5,12 +5,10 @@ module Web.WordsApi
        , Definition(..)
        ) where
 
-import Control.Lens
 import Data.Aeson
 import Control.Applicative
 import Control.Monad
 import Data.String.Conversions
-import qualified Data.HashMap.Strict as Hash
 
 import Web.SimpleHTTPConduit
 import qualified Data.ByteString.Lazy as L

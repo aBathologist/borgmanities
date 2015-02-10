@@ -4,7 +4,6 @@ module PaperTitle.Gen
        ) where
 
 import Data.Char
-import Data.List
 import Text.Regex
 
 -- TODO: Turn into a pure environment for building up a title.

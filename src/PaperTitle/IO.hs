@@ -11,7 +11,6 @@ import PaperTitle.Gen
 import Web.WordsApi
 import qualified Web.Twitter as Twitter
 
-import Data.Either
 import Data.Maybe
 import Data.List
     
@@ -23,9 +22,9 @@ import Test.QuickCheck (generate, elements)
 -- SETTINGS
 
 prepositionsFile, hashtagsFile, seedNounsFile :: FilePath
-prepositionsFile = "src/resources/prepositions.txt"
-hashtagsFile     = "src/resources/hashtags.txt"
-seedNounsFile    = "src/resources/seedNouns.txt"
+prepositionsFile = "resources/prepositions.txt"
+hashtagsFile     = "resources/hashtags.txt"
+seedNounsFile    = "resources/seedNouns.txt"
 
 
 -- ASSEMBLING TitleParts
