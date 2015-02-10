@@ -67,7 +67,7 @@ toTitleCase str = (unwords . (first :) . map capitalize) rest
                                
 dontCapitalize, prepositions, articles, conjunctions :: [String]
 dontCapitalize = prepositions ++ articles ++ conjunctions
-prepositions = ["about","across","amid","as","at", "by",
+prepositions = ["about","across","amid","as","at", "by", "of",
                 "for","from","in","into","opposite", "over","past","per","through","to",
                 "toward","towards","until","upon","versus","via","with","within","without"]
 articles     = ["a", "the", "an"]
