@@ -1,13 +1,13 @@
-:- module(attributes,[attributes/2]).
+:- module(attributes,[rel_attributes/2]).
 
 :- use_module(db).
 
-src('db/wn_at.pl').
+src(wn(db/wn_at)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-attributes(Id, AttrId) :-
+rel_attributes(Id, AttrId) :-
     src(Src),
     call_ensuring_src_loaded(at(Id, AttrId), Src).

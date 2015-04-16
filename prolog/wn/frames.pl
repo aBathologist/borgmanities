@@ -1,13 +1,13 @@
-:- module(frames,[frames/3]).
+:- module(frames,[rel_frames/3]).
 
 :- use_module(db).
 
-src('db/wn_fr.pl').
+src(wn(db/wn_fr)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-frames(Id, FrameNum, WordNum) :-
+rel_frames(Id, FrameNum, WordNum) :-
     src(Src),
     call_ensuring_src_loaded(fr(Id, FrameNum, WordNum), Src).

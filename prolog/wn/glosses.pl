@@ -1,15 +1,15 @@
 :- module( glosses,
-           [ glosses/2 ]
+           [ rel_glosses/2 ]
          ).
 
 :- use_module(db).
 
-src('db/wn_g.pl').
+src(wn(db/wn_g)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
     
-glosses(Id, Glosses) :-
+rel_glosses(Id, Glosses) :-
     src(Src),
     call_ensuring_src_loaded(g(Id, Glosses), Src).

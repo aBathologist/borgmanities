@@ -15,6 +15,22 @@
         *                                        *
         *****************************************/
 
+
+%% Relative path aliases:
+%
+%   Assert `wn(...)` as a path alias to the current directory
+%   location of the wn package.
+
+:- dynamic   user:file_search_path/2.
+:- multifile user:file_search_path/2.
+
+:- prolog_load_context(directory, Dir),
+   asserta(user:file_search_path(wn, Dir)).
+
+
+%% Prime and access file-load-tracking databse
+%
+
 :- retractall(src_loaded(_)).
 
 :- meta_predicate call_ensuring_src_loaded(0, :).
@@ -25,6 +41,7 @@ call_ensuring_src_loaded(P, Src) :-
         assertz(src_loaded(Src)),
         call(P)
     ).
+
 
         /*****************************************
         *                                        *

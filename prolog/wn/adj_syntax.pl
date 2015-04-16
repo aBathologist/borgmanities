@@ -1,14 +1,14 @@
-:- module(adj_syntax,[adj_syntax/3]).
+:- module(adj_syntax,[rel_adj_syntax/3]).
 
 :- use_module(db).
 
-src('db/wn_syntax.pl').
+src(wn(db/wn_syntax)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-adj_syntax(Id, Num, Syntax) :-
+rel_adj_syntax(Id, Num, Syntax) :-
     src(Src),
     call_ensuring_src_loaded(syntax(Id, Num, Abbr), Src),
     abbreviation_syntax(Abbr, Syntax).

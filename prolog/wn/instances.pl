@@ -1,13 +1,13 @@
-:- module(instances,[instances/2]).
+:- module(instances,[rel_instances/2]).
 
 :- use_module(db).
 
-src('db/wn_ins.pl').
+src(wn(db/wn_ins)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-instances(IdA, IdB) :-
+rel_instances(IdA, IdB) :-
     src(Src),
     call_ensuring_src_loaded(ins(IdA, IdB), Src).

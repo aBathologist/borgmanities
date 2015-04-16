@@ -2,8 +2,7 @@
 :- use_module(
            [
                db,
-               synsets,
-               glosses
+               wn
            ]).
 
 %% TBD:
@@ -34,69 +33,6 @@
 
         /*****************************************
         *                                        *
-        *       DATABASE AND RELATION NAMES      *
-        *                                        *
-        *****************************************/
-
-% user:file_search_path(db, '/Users/aporiac/projects/borgmanities/prolog/db').
-
-%% relation_wnOp(?RelationName, ?WnOperator)
-%
-%   Inteligible names for wordnet operators:
-
-%% relation_wnOp(synsets,         s).
-%% relation_wnOp(sense_keys,      sk).
-%% relation_wnOp(glosses,         g).
-%% relation_wnOp(syntax,          syntax).
-%% relation_wnOp(hypernyms,       hyp).
-%% relation_wnOp(instances,       ins).
-%% relation_wnOp(entailments,     ent).
-%% relation_wnOp(similars,        sim).
-%% relation_wnOp(mem_meronyms,    mm).
-%% relation_wnOp(sub_meronyms,    ms).
-%% relation_wnOp(par_meronyms,    mp).
-%% relation_wnOp(derivations,     der).
-%% relation_wnOp(classifications, cls).
-%% relation_wnOp(causes,          cs).
-%% relation_wnOp(grouped_verbs,   vgp).
-%% relation_wnOp(attributes,      at).
-%% relation_wnOp(antonyms,        ant).
-%% relation_wnOp(see_also,        sa).
-%% relation_wnOp(participles,     ppl).
-%% relation_wnOp(pertainym,       per).
-%% relation_wnOp(frames,          f).
-
-
-%% %% apply_relation(+Relation, ?Args)
-%% %
-%% %   Apply a wn operator to a list of args
-%% %   using the relation name.
-
-%% apply_rel(Relation, Args) :-
-%%     relation_wnOp(Relation, Op),
-%%     apply(Op, Args).
-
-%% %% relation_file(?RelationName:atom, ?WnDBFileName:atom)
-%% %
-%% %   Get the names of wordnet db files using the relation
-%% %   names
-
-%% relation_file(Relation, File) :-
-%%     relation_wnOp(Relation, Op),
-%%     atom_concat(wn_, Op, File).
-
-%% %% load_wn_database(+Database:atom)
-%% %
-%% %   Load a wordnet db using the the name of relation
-%% %   defined in the databse.
-
-%% load_wn_database(Database) :-
-%%     relation_file(Database, File),
-%%     consult(db(File)).
-
-
-        /*****************************************
-        *                                        *
         * DCGS FOR ASSEMBLING INFO ABOUT A WORD. *
         *                                        *
         *****************************************/
@@ -116,7 +52,7 @@ state(S0, S1), [S1] --> [S0].
 %   
 get_word(Word), [Attrs] -->
     {
-        apply_rel(synsets, [Id,W_Num,Word,Type,_,_]),
+        rel_synsets(Id,W_Num,Word,Type,_,_),
         Attrs = [word-Word, id-Id, num-W_Num, type-Type]
     }.
 
@@ -146,16 +82,20 @@ set_attr(Label-Attr) --> state(Attrs, NewAttrs),
 gloss --> gloss(both).
 
 gloss(Type) --> attr(id-Id),
-                { apply_rel(glosses, [Id, Gloss]) },
+                { rel_glosses(Id, Gloss) },
                 gloss(Type, Gloss).
 
 gloss(both, Gloss) --> gloss(def, Gloss), gloss(ex, Gloss).
-gloss(def, Gloss) --> set_attr(defs-Defs),
+
+% Gloss entries are separated by semicolons.
+% Definitions are atoms.
+gloss(def, Gloss) --> set_attr(defs-Defs), 
                       {
                           atomic_list_concat(Parts, '; ', Gloss),
                           exclude(prefex_of_atom('"'), Parts, Defs)
                       }.
 
+% Examples are atoms beginning and ending with quotation marks.
 gloss(ex,  Gloss) --> set_attr(exs-Exs),
                       {
                           atomic_list_concat(Parts, '; ', Gloss),
@@ -168,20 +108,19 @@ prefex_of_atom(Prefix, Atom) :-
 %% HYPER- & HYPO-NYMS
 
 hypernyms --> attr(word-Word), attr(id-Id),
-              { word_ids_hypernyms(Word, Id, _, Hypernyms) },
+              { word_id_hypernyms(Word, Id, Hypernyms) },
               set_attr(hypernyms-Hypernyms).
 
 hyponyms --> attr(word-Word), attr(id-Id),
-             { word_ids_hypernyms(Word,_,Id, Hyponyms) },
+             { word_id_hyponyms(Word, Id, Hyponyms) },
              set_attr(hyponyms-Hyponyms).
 
-%% TBD: Trace down SO caused by some looping here when
-%   querried with `Word` free...
-%
+% Collecting all hypernyms and hyponyms of given
+% word-synset combination.
 
-word_ids_hypernyms(Word, HypoId, HyperId, Hypernyms) :-
+word_id_hypernyms(Word, HypoId, Hypernyms) :-
     findall( HyperId,
-             apply_rel(hypernyms, [HypoId, HyperId]),
+             rel_hypernyms(HypoId, HyperId),
              HyperIds),
     findall( Hypernym,
              maplist(word_sid, Hypernym, HyperIds),
@@ -191,17 +130,30 @@ word_ids_hypernyms(Word, HypoId, HyperId, Hypernyms) :-
     ToSort \= [],
     sort(ToSort, Hypernyms).
 
+word_id_hyponyms(Word, HyperId, Hyponyms) :-
+    findall( HypoId,
+             rel_hypernyms(HypoId, HyperId),
+             HypoIds),
+    findall( Hyponym,
+             maplist(word_sid, Hyponym, HypoIds),
+             NestedHyponyms),
+    flatten(NestedHyponyms, ToExclude),
+    exclude(=(Word), ToExclude, ToSort),
+    ToSort \= [],
+    sort(ToSort, Hyponyms).
+
+
 %% INSTANCES
 
 instances -->
     attr(id-Id),
     {
-        findall(InsId, ins(InsId, Id), InsIds),
+        findall(InsId, rel_instances(InsId, Id), InsIds),
         InsIds \= [],
         maplist(synset_words, InsIds, NestedWords),
-        flatten(NestedWords, Words)
+        flatten(NestedWords, Instances)
     },
-    set_attr(instances-Words), !.
+    set_attr(instances-Instances), !.
 
 %% ENTAILMENTS
 
@@ -267,23 +219,23 @@ derivations -->
     attr(id-Id), attr(num-N),
     {
         findall(DerId-Num,
-                apply_rel(derivations, [Id, N, DerId, Num]),
+                rel_derivations(Id, N, DerId, Num),
                 DerIdsNums),
         DerIdsNums \= [],
         pairs_keys(DerIdsNums, Ids),
         pairs_values(DerIdsNums, Nums),
-        maplist(word_sid_num, Words, Ids, Nums)
+        maplist(word_sid_num, Words, Ids, Nums),
+        sort(Words, SortedWords)
     },
-    set_attr(derivations-Words).
+    set_attr(derivations-SortedWords).
 
 %% CLASSIFICATIONS
 
 classifications -->
-    attr(id-Id), attr(num-Num),
+    attr(id-Id), attr(num-N),
     {
         findall(ClassId-ClassNum,
-                apply_rel(classifications,
-                          [Id, Num, ClassId, ClassNum, _]),
+                rel_classifications(Id, N, ClassId, ClassNum, _),
                 ClassIdsNumsTypes),
         ClassIdsNumsTypes \= [],
         pairs_keys(ClassIdsNumsTypes, Ids),
@@ -310,12 +262,12 @@ attributes -->
         ).
 
 %% GROUPED VERBS
+%% todo: FIX!!
 grouped_verbs -->
     attr(type-v), attr(id-Id), attr(num-Num),
     {
         findall(VerbId-VerbNum,
-                apply_rel(grouped_verbs,
-                          [Id, Num, VerbId, VerbNum]),
+                rel_grouped_verbs(Id, Num, VerbId, VerbNum),
                VerbIdNums),
         VerbIdNums \= [],
         pairs_keys(VerbIdNums, VerbIds),
@@ -362,8 +314,9 @@ guard_attr_inv_rel(Guard, Label, Rel) -->
 related_words(Relation, Words) -->
     attr(id-Id),
     {
+        atom_concat('rel_', Relation, RelPredicate), 
         findall( RelataId,
-                 apply_rel(Relation, [Id, RelataId]),
+                 call(RelPredicate, Id, RelataId),
                  RelataIds
                ),
         maplist(synset_words, RelataIds, NestedWords),
@@ -373,23 +326,15 @@ related_words(Relation, Words) -->
 inv_related_words(Relation, Words) -->
     attr(id-Id),
     {
+        atom_concat('rel_', Relation, RelPredicate), 
         findall( RelataId,
-                 apply_rel(Relation, [RelataId, Id]),
+                 call(RelPredicate, RelataId, Id),
                  RelataIds
                ),
         maplist(synset_words, RelataIds, NestedWords),
         flatten(NestedWords, Words),
         Words \= []
     }.
-
-
-synset_words(ID, Words) :- findall(Word, word_sid(Word, ID), Words).
-
-%% do dcg with state, unless dcg fails,
-%% then just pass the state along unchanged.
-
-maybe(DCG) --> DCG, !
-             ; state(_). 
 
 
         /*****************************************
@@ -400,51 +345,35 @@ maybe(DCG) --> DCG, !
 
 word(Word, Result) :-
     phrase(get_word(Word), [], [Result]).
+
 word_fields(Word, Fields) :-
     word_fields(Word, Fields, _).
 word_fields(Word, Fields, Result) :-
     phrase((get_word(Word), Fields), [], [Result]).
 
-%% word_entry(Word, Entry) :-
-%%     s(S_Id, W_Num, Word, Type, Sense_Number, Tag_Count),
-%%     g(S_Id, Gloss).
+word_fields_entries(Word, Fields, Entries) :-
+    findall(Entry,
+            word_fields(Word, Fields, Entry),
+            Entries ).
 
-%% init_word(Word, WordTerm) :-
-%%     s(Id,Num,Word,Type,_,_),
-%%     word(Id,Num,Word,Type).
+        /*****************************************
+        *                                        *
+        *  Predicates for getting synset parts   *
+        *                                        *
+        *****************************************/
 
-%% get_word_attr(Word-Attrs, Attr, Value) :-
-%%     member(Attr-Value, Attrs).
-     
 word_sid(Word, Sid) :-
-    s(Sid,_,Word,_,_,_). 
+    rel_synsets(Sid,_,Word,_,_,_). 
 word_sid_num(Word, Sid, Num) :-
-    s(Sid,Num,Word,_,_,_).
+    rel_synsets(Sid,Num,Word,_,_,_).
 word_type(Word, Type) :-
-    s(_,_,Word,Type,_,_).
+    rel_synsets(_,_,Word,Type,_,_).
 
-%% word_gloss(Word, Sid, Gloss) :-
-%%     word_sid_num(Word, Sid, _),
-%%     word_sid_num(Word, )
+synset_words(ID, Words) :- findall(Word, word_sid(Word, ID), Words).
 
-word_sid_hypernym(Word, Wsid, Hypernym, Hsid) :-
-    (ground(Word), var(Wsid) -> word_sid_num(Word, Wsid, _) ; true),
-    hyp(Wsid, Hsid),
-    word_sid_num(Hypernym, Hsid, _).
+%% REMOVE?
 
-all_hypo_and_hypernyms(Word, Nyms) :-
-    findall(
-            Nym,
-            ( hyponym_hypernym(Word, Nym)
-            ; hyponym_hypernym(Nym, Word) ),
-            Nyms
-        ).
-
-
-
-
-
-
-
-
-
+%% do dcg with state, unless dcg fails,
+%% then just pass the state along unchanged.
+maybe(DCG) --> DCG, !
+             ; state(_). 

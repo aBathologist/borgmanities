@@ -1,14 +1,14 @@
-:- module(classifications,[classifications/5]).
+:- module(classifications,[rel_classifications/5]).
 
 :- use_module(db).
 
-src('db/wn_cls.pl').
+src(wn(db/wn_cls)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-classifications(MemberId, MemberNum, ClassId, ClassNum, ClassType) :-
+rel_classifications(MemberId, MemberNum, ClassId, ClassNum, ClassType) :-
     src(Src),
     call_ensuring_src_loaded(cls(MemberId, MemberNum, ClassId, ClassNum, AbbreviatedType), Src),
     abbreviation_class_type(AbbreviatedType, ClassType).

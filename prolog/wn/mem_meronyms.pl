@@ -1,13 +1,13 @@
-:- module(mem_meronyms,[mem_meronyms/2]).
+:- module(mem_meronyms,[rel_mem_meronyms/2]).
 
 :- use_module(db).
 
-src('db/wn_mm.pl').
+src(wn(db/wn_mm)).
 
 load :-
     src(Src),
     ensure_loaded(Src).
 
-mem_meronyms(HolonymId, MeronymId) :-
+rel_mem_meronyms(HolonymId, MeronymId) :-
     src(Src),
     call_ensuring_src_loaded(mm(HolonymId, MeronymId), Src).
