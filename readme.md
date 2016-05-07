@@ -2,15 +2,10 @@
 
     Resistance is facile.
 
-This project is for fun and learning. We are currently working on a
-twitter bot in Haskell (plus a touch of python), but may expand in any
-number of directions in the future. If we had an agenda, it would
-include opposing borgification.
+This project was for fun and learning. We made a
+twitter bot in Haskell (plus a touch of Python). 
+If we had an agenda, it would have included opposing 
+borgification.
 
-## Active Project:
-
-- [BotticelliBot](https://github.com/aBathologist/borgmanities/wiki/BotticelliBot): a nascent twitter bot.
-
-## Todo:
-
-Todo list has been moved into the [issue tracker](https://github.com/aBathologist/borgmanities/milestones/BotticelliBot%20Launch).
+You can read the nonsense it tweeted on its [Twitter timeline](https://twitter.com/BotticelliBot) 
+or read documentation about it's development on the [BotticelliBot wiki](https://github.com/aBathologist/borgmanities/wiki/BotticelliBot).
